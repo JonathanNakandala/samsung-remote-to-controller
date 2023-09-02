@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "samsung-remote-to-controller"
+version = "0.1.0"
+description = "Map Samsung Remote controller to gamepad"
+authors = ["Jonathan Nakandala"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+evdev = "^1.6.1"
+structlog = "^23.1.0"
+rich = "^13.5.2"
+pydantic = "^2.3.0"
+pyyaml = "^6.0.1"
+
+[tool.poetry.dev-dependencies]
+black = "^23.7.0"
+pylint = "^2.17.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+# This creates an entry point to your module so you can call it from the command line
+remote_to_controller = 'remote_to_controller.main:main'
