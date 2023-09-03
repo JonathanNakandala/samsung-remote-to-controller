@@ -1,0 +1,84 @@
+name: Smart Control 2016
+description: Samsung Smart Remote Control for TVs
+
+event:
+  type: EV_REL
+  code: REL_MISC
+
+mappings:
+
+- event_code: BTN_C
+  remote_value: 2
+  description: Power
+
+- event_code: BTN_WEST
+  remote_value: 210
+  description: Red, Green, Yellow, Blue 123
+
+- event_code: BTN_EAST
+  remote_value: 246
+  description: Picture
+  
+- event_code: BTN_NORTH
+  remote_value: 160
+  description: Mic
+
+
+- event_code: BTN_DPAD_UP
+  remote_value: 96
+  description: Up
+  
+- event_code: BTN_DPAD_DOWN
+  remote_value: 97
+  description: Down
+  
+- event_code: BTN_DPAD_LEFT
+  remote_value: 101
+  description: Left
+  
+- event_code: BTN_DPAD_RIGHT
+  remote_value: 98
+  description: Right
+
+
+- event_code: BTN_SOUTH
+  remote_value: 104
+  description: Select, Centre button
+
+- event_code: BTN_MODE
+  remote_value: 121
+  description: Home
+  
+- event_code: BTN_START
+  remote_value: 185
+  description: Play
+  
+- event_code: BTN_SELECT
+  remote_value: 88
+  description: Back
+
+
+- event_code: BTN_THUMBL
+  remote_value: 15
+  description: Volume Click
+  
+- event_code: BTN_TL
+  remote_value: 7
+  description: Volume +
+  
+- event_code: BTN_TL2
+  remote_value: 11
+  description: Volume -
+
+
+- event_code: BTN_THUMBR
+  remote_value: 79
+  description: Channel click
+
+- event_code: BTN_TR
+  remote_value: 18
+  description: Channel +
+  
+- event_code: BTN_TR2
+  remote_value: 16
+  description: Channel -
