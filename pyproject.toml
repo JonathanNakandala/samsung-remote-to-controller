@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Map Samsung Remote controller to gamepad"
 authors = ["Jonathan Nakandala"]
 readme = "README.md"
-
+packages = [
+    { include = "remote_to_controller" },
+]
 [tool.poetry.dependencies]
 python = "^3.10"
 evdev = "^1.6.1"

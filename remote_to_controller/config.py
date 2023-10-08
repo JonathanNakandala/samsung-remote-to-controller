@@ -8,6 +8,8 @@ from structlog import get_logger
 from evdev import InputDevice
 
 from remote_to_controller.device import get_device
+from remote_to_controller.check_uinput import can_write_to_uinput
+from remote_to_controller.usb_gadget import check_kernel_modules
 from remote_to_controller.mapping import get_mapping
 from remote_to_controller.models import MappingDefinition
 
@@ -58,6 +60,10 @@ def set_config() -> Config:
     Get and Set the config
     """
     parsed_args = parse_arguments()
+    if check_kernel_modules():
+        log.info("USB Mode Available")
+    if can_write_to_uinput():
+        log.info("Can write to /dev/uinput")
     device = get_device(parsed_args)
     mapping = get_mapping(parsed_args)
     return Config(

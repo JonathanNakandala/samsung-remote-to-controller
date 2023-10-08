@@ -115,6 +115,7 @@ def main():
     """
     Entrypoint
     """
+
     config = set_config()
     log.info("Samsung Report to Virtual Gamepad", config=config)
     # virtual_gamepad(config)
