@@ -7,8 +7,6 @@ from pathlib import Path
 from structlog import get_logger
 from .models import (
     USBGadgetModel,
-    USBConfigDescriptor,
-    HIDProtocol,
     GadgetLocale,
     HIDFunction,
 )
