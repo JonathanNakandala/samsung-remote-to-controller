@@ -35,12 +35,12 @@ def setup_rpi_joystick_gadget(descriptor):
         ],
     )
     # Create a new USBGadget instance
-    joystick_gadget = USBGadget("32_buttons_rpi_joystick5", joystick_model)
+    joystick_gadget = USBGadget("32_buttons_rpi_joystick7", joystick_model)
 
     # Create the gadget directory in sysfs
     joystick_gadget.activate()
 
 
-descriptor = create_gamepad_descriptor(18)
+descriptor = create_gamepad_descriptor(24)
 # Run the function to set up the gadget
 setup_rpi_joystick_gadget(descriptor)

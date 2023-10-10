@@ -57,6 +57,16 @@ def start_collection(collection_type: HIDCollectionType) -> list:
     return [HIDFieldType.COLLECTION, collection_type]
 
 
+def set_report_id(number: int) -> list:
+    """
+    Generates a HID descriptor list to start a collection.
+
+    This function begins a new collection in the HID descriptor. Collections allow
+    grouping of related data inputs or outputs.
+    """
+    return [HIDFieldType.REPORT_ID, number]
+
+
 def create_collection(
     usage_page: HIDUsagePage,
     usage: HIDPageGenericDesktop,
@@ -80,15 +90,15 @@ def create_collection(
         collection_type,
     ]
 
-    return enum_to_values(descriptor)
+    return descriptor
 
 
-def end_collection() -> list[int]:
+def end_collection() -> list:
     """
     End an opened collection
     """
     descriptor = [HIDFieldType.END_COLLECTION]
-    return enum_to_values(descriptor)
+    return descriptor
 
 
 def logical_minimum_maximum(min_value: int, max_value: int) -> list:
@@ -103,16 +113,63 @@ def logical_minimum_maximum(min_value: int, max_value: int) -> list:
     ]
 
 
+def physical_minimum_maximum(min_value: int, max_value: int) -> list:
+    """
+    The min and max values of the button, axis etc
+    """
+    return [
+        HIDFieldType.PHYSICAL_MINIMUM,
+        min_value,
+        HIDFieldType.PHYSICAL_MAXIMUM,
+        max_value,
+    ]
+
+
 def define_axis(axis: int) -> list:
     return [HIDFieldType.USAGE, axis]
 
 
 def report_size_count(size: int, count: int) -> list:
+    """
+    The size of the report and the count of how many to report
+    """
     return [HIDFieldType.REPORT_SIZE, size, HIDFieldType.REPORT_COUNT, count]
 
 
 def input_data_variable_absolute() -> list:
     return [HIDFieldType.INPUT, 0x02]
+
+
+def define_input_type(input_type: HIDInputType) -> list[int]:
+    """
+    Generates the descriptor bytes for the specified HID input type.
+    """
+    return [HIDFieldType.INPUT, input_type]
+
+
+def usage_minimum_maximum(min_value: int, max_value: int) -> list:
+    """
+    The amount of of the item
+    """
+    return [
+        HIDFieldType.USAGE_MINIMUM,
+        min_value,
+        HIDFieldType.USAGE_MAXIMUM,
+        max_value,
+    ]
+
+
+def unit_and_exponent(unit: int, exponent: int):
+    """
+    Unit and exponent
+    """
+
+    return [
+        HIDFieldType.UNIT,
+        unit,
+        HIDFieldType.UNIT_EXPONENT,
+        exponent,
+    ]
 
 
 def define_digital_buttons(num_buttons: int) -> list[int]:
@@ -123,56 +180,20 @@ def define_digital_buttons(num_buttons: int) -> list[int]:
     to the specified maximum number of buttons. The buttons are defined as single-bit
     digital inputs with a logical range of 0 to 1.
     """
-    return [
-        HIDFieldType.USAGE_PAGE,
-        HIDUsagePage.BUTTON,
-        HIDFieldType.USAGE_MINIMUM,
-        1,
-        HIDFieldType.USAGE_MAXIMUM,
-        num_buttons,
-        HIDFieldType.LOGICAL_MINIMUM,
-        0,
-        HIDFieldType.LOGICAL_MAXIMUM,
-        1,
-        HIDFieldType.REPORT_COUNT,
-        num_buttons,
-        HIDFieldType.REPORT_SIZE,
-        0x01,  # Report Size (1 bit)
-        HIDFieldType.INPUT,
-        HIDInputType.DATA_VARIABLE_ABSOLUTE,  # Input (Data, Variable, Absolute)
-    ]
-
-
-def create_joystick_descriptor(num_buttons: int) -> bytes:
-    """
-    Create a Joystick
-    """
-    if num_buttons < 1 or num_buttons > 255:
-        raise ValueError("Number of buttons should be between 1 and 255.")
-
-    descriptor_bytes = (
-        set_usage(HIDUsagePage.GENERIC_DESKTOP, HIDPageGenericDesktop.JOYSTICK)
-        + start_collection(HIDCollectionType.APPLICATION)
-        + logical_minimum_maximum(0x0, 0x1)
-        + define_axis(0x30)  # Usage (X)
-        + define_axis(0x31)  # Usage (Y)
-        + report_size_count(
-            0x08, 0x02
-        )  # Report Size of 8 bits and Report Count of 2 axes
-        + input_data_variable_absolute()
-        + end_collection()
-        + define_digital_buttons(num_buttons)
-        + end_collection()
+    return (
+        (
+            [
+                HIDFieldType.USAGE_PAGE,
+                HIDUsagePage.BUTTON,
+            ]
+        )
+        + usage_minimum_maximum(1, num_buttons)
+        + logical_minimum_maximum(0, 1)
+        + physical_minimum_maximum(0, 1)
+        + unit_and_exponent(0, 0)
+        + report_size_count(1, num_buttons)
+        + define_input_type(HIDInputType.VARIABLE)
     )
-
-    return bytes(enum_to_values(descriptor_bytes))
-
-
-def define_input_type(input_type: HIDInputType) -> list[int]:
-    """
-    Generates the descriptor bytes for the specified HID input type.
-    """
-    return [HIDFieldType.INPUT.value, input_type.value]
 
 
 def create_gamepad_descriptor(num_buttons: int) -> bytes:
@@ -186,12 +207,13 @@ def create_gamepad_descriptor(num_buttons: int) -> bytes:
         # Define the gamepad collection
         set_usage(HIDUsagePage.GENERIC_DESKTOP, HIDPageGenericDesktop.GAMEPAD)
         + start_collection(HIDCollectionType.APPLICATION)
+        + set_report_id(1)
+        + start_collection(HIDCollectionType.PHYSICAL)
         # Define buttons
-        + set_usage(HIDUsagePage.BUTTON, 1)
         + define_digital_buttons(num_buttons)
-        + define_input_type(HIDInputType.DATA_VARIABLE_ABSOLUTE)
+        + end_collection()
         + end_collection()
     )
-    values = enum_to_values(descriptor)
-    print(values)
-    return bytes(values)
+    values = bytes(enum_to_values(descriptor))
+    log.info("Generated Descriptor", descriptor=descriptor, values=values.hex())
+    return values

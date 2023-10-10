@@ -108,7 +108,7 @@ class USBGadget:
                 "report_length", str(hid_function.report_length), hid_function_path
             )
             self._write_value(
-                "report_desc", str(hid_function.report_desc.hex()), hid_function_path
+                "report_desc", hid_function.report_desc, hid_function_path
             )
 
     def _setup_config_strings(self, config_path: Path, locale: GadgetLocale):

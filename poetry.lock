@@ -587,6 +587,17 @@ files = [
 ]
 
 [[package]]
+name = "usb-gadget"
+version = "0.2"
+description = "A python library for creating and interfacing with USB Gadgets on Linux through libcomposite"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "usb_gadget-0.2-py3-none-any.whl", hash = "sha256:3c36ff3a04b30a946388907c626f36d888b9448640bc24fa774a31d3ecdf012b"},
+    {file = "usb_gadget-0.2.tar.gz", hash = "sha256:d97bb66148f4aef55c183ce09cc0397012d42ae57f7ba1e77ad4bb45b749c94f"},
+]
+
+[[package]]
 name = "wrapt"
 version = "1.15.0"
 description = "Module for decorators, wrappers and monkey patching."
@@ -673,4 +684,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "3a88b433fd799063110e534d88da05e050f2238bdcc8d2f29e2dce8188f9b9c1"
+content-hash = "500aaa9a58bed089022cdf84de6da366bfe01616c1e0ccbb72cce2f4410f0965"

@@ -93,6 +93,24 @@ g_hid
 ```
 
 
+### Configure permissions
+
+Create:
+```
+sudo nano /etc/udev/rules.d/99-usb-gadget.rules
+```
+
+```
+SUBSYSTEM=="usb_gadget", ACTION=="add|change", ATTRS{idVendor}=="0x1d6b", ATTRS{idProduct}=="0x0105", GROUP="input", MODE="0660"
+```
+
+You can try reloading live, but it seems it sometimes requires a reboot to actually work
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+```
+
 ## Troubleshooting
 
 ### `evdev.uinput.UInputError: "/dev/uinput" cannot be opened for writing`

@@ -8,9 +8,9 @@ from enum import IntEnum
 class HIDUsagePage(IntEnum):
     """
     Section 3: Usage Pages
-    0x00 is undefined
     """
 
+    UNDEFINED = 0x00
     GENERIC_DESKTOP = 0x01
     SIMULATION_CONTROLS = 0x02
     VR_CONTROLS = 0x03
@@ -112,6 +112,7 @@ class HIDPageSport(IntEnum):
     ROWING_MACHINE = 0x03
     THREADMILL = 0x04
     STICK_TYPE = 0x28
+
 
 class HIDPageGameControls(IntEnum):
     """
