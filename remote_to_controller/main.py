@@ -28,9 +28,9 @@ def create_event_translation(
     }
 
     gadget_translations = {
-        getattr(ecodes, map.event_code): index
-        for index, map in enumerate(mapping.mappings)
+        map.remote_value: index for index, map in enumerate(mapping.mappings)
     }
+
     log.debug("Generated mappings", virtual=translations, gadget=gadget_translations)
     return translations, gadget_translations
 
@@ -117,6 +117,13 @@ async def send_to_virtual(virtual_gp: UInput, translated_event: int):
     log.info("Button Released", button=translated_event)
 
 
+def bytes_to_binary_str(bytes_obj: bytearray) -> str:
+    """
+    Outputs the data to a binary strin
+    """
+    return "".join(f"{byte:08b}" for byte in bytes_obj)
+
+
 async def write_hid_report_to_device(hid_endpoint, buttons_state):
     """
     Send HID report to the device endpoint.
@@ -144,10 +151,32 @@ async def write_hid_report_to_device(hid_endpoint, buttons_state):
     # Fill in the remaining bytes (if any)
     while len(report_bytes) < 4:
         report_bytes.append(0x00)
+    # Report for all buttons released
+    release_report_bytes = bytearray([0x01, 0x00, 0x00, 0x00])
     try:
         with open(hid_endpoint, "wb") as hid_device:
+            # Write the button press report
             hid_device.write(report_bytes)
-            log.info("Sent to gadget with result", data=str(report_bytes))
+            log.info(
+                "Sent button press to gadget with result",
+                endpoint=hid_endpoint,
+                data=bytes_to_binary_str(report_bytes),
+            )
+    except (FileNotFoundError, OSError, PermissionError, ValueError, IOError):
+        log.error("Error while sending to gadget", exc_info=True)
+        # Short delay before releasing the button
+        # To ensure the press is registered.
+    await asyncio.sleep(0.2)
+    try:
+        with open(hid_endpoint, "wb") as hid_device:
+            # Write the button release report
+            hid_device.write(release_report_bytes)
+            log.info(
+                "Sent button release to gadget with result",
+                endpoint=hid_endpoint,
+                data=bytes_to_binary_str(release_report_bytes),
+            )
+
     except (FileNotFoundError, OSError, PermissionError, ValueError, IOError):
         log.error("Error while sending to gadget", exc_info=True)
 
@@ -184,35 +213,48 @@ async def watch_device(config: Config):
     Read events and process
     """
     virtual_translation, gadget_translation = create_event_translation(config.mapping)
-    match config.gamepad.gamepad_type:
-        case "virtual":
-            virtual_gp = create_virtual_gamepad(config)
-            try:
-                async for event in config.device.async_read_loop():
-                    if event.type == getattr(ecodes, config.mapping.event.type):
-                        processed_event = await process_event(
-                            event, virtual_translation
-                        )
-                        if processed_event is not None:
-                            await send_to_virtual(virtual_gp, processed_event)
-                        await asyncio.sleep(0.1)
-            finally:
-                virtual_gp.close()
-                log.info("Virtual Gamepad Closed")
-        case "gadget":
-            try:
-                async for event in config.device.async_read_loop():
-                    if event.type == getattr(ecodes, config.mapping.event.type):
-                        processed_event = await process_event(event, gadget_translation)
-                        if processed_event is not None:
-                            await send_to_gadget(
-                                config.device.hid_endpoint, processed_event
-                            )
-                        await asyncio.sleep(0.1)
-            finally:
-                log.info("Ending gadget")
-        case _:
-            raise ValueError("Unsupported gamepad type")
+
+    while True:
+        try:
+            match config.gamepad.gamepad_type:
+                case "virtual":
+                    virtual_gp = create_virtual_gamepad(config)
+                    try:
+                        async for event in config.device.async_read_loop():
+                            if event.type == getattr(ecodes, config.mapping.event.type):
+                                processed_event = await process_event(
+                                    event, virtual_translation
+                                )
+                                if processed_event is not None:
+                                    await send_to_virtual(virtual_gp, processed_event)
+                                await asyncio.sleep(0.1)
+                    finally:
+                        virtual_gp.close()
+                        log.info("Virtual Gamepad Closed")
+
+                case "gadget":
+                    try:
+                        async for event in config.device.async_read_loop():
+                            if event.type == getattr(ecodes, config.mapping.event.type):
+                                processed_event = await process_event(
+                                    event, gadget_translation
+                                )
+                                if processed_event is not None:
+                                    await send_to_gadget(
+                                        config.gamepad.hid_endpoint, processed_event
+                                    )
+                                await asyncio.sleep(0.1)
+                    finally:
+                        log.info("Ending gadget")
+
+                case _:
+                    raise ValueError("Unsupported gamepad type")
+
+        except OSError:
+            log.warning("Device disconnected, waiting for it to become available...")
+            while not device_available(config.device.path):
+                await asyncio.sleep(RECHECK_DELAY)
+            log.info("Device reconnected, resuming...")
 
 
 def main():
