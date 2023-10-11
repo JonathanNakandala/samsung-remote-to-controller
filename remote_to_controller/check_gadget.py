@@ -23,7 +23,7 @@ def check_kernel_modules() -> bool:
     """
     Check if the required kernel modules for USB devices are loaded
     """
-    modules_to_check = ["configfs", "libcomposite"]
+    modules_to_check = ["g_hid", "configfs", "libcomposite"]
     modules_list = load_modules_list()
 
     not_loaded_modules = []
@@ -37,6 +37,6 @@ def check_kernel_modules() -> bool:
 
     missing_modules = ", ".join(not_loaded_modules)
     log.warning(
-        f"Kernel module(s) {missing_modules} are not loaded can't act as usb gadget"
+        f"Kernel module(s) {missing_modules} not loaded may not be possible to act as usb gadget"
     )
     return False

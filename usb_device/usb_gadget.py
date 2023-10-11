@@ -46,7 +46,7 @@ class USBGadget:
         """
         attr_path = self._get_attr_path(attribute, path)
         try:
-            mode = "wb" if type(value) == bytes else "w"
+            mode = "wb" if isinstance(value, bytes) else "w"
             with attr_path.open(mode) as f:
                 f.write(value)
                 log.info("Wrote value to attribute", attribute=attribute, value=value)
