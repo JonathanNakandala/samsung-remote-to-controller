@@ -23,7 +23,7 @@ def check_kernel_modules() -> bool:
     """
     Check if the required kernel modules for USB devices are loaded
     """
-    modules_to_check = ["g_hid", "libcomposite"]
+    modules_to_check = ["configfs", "libcomposite"]
     modules_list = load_modules_list()
 
     not_loaded_modules = []
