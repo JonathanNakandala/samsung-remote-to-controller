@@ -1,31 +1,30 @@
+"""
+Create a USB Gamepad Device
+"""
 from structlog import get_logger
 
 
-from usb_device import (
-    USBGadget,
-    models,
-    create_gamepad_descriptor,
-)
+from usb_device import USBGadget, models, create_gamepad_descriptor
 
 log = get_logger()
 
 
-def get_report_length(descriptor: bytes) -> int:
-    # Constants for HID descriptor
-    REPORT_SIZE = 0x75
-    REPORT_COUNT = 0x95
-
+def calculate_report_length(descriptor: bytes) -> int:
+    """
+    We need to define the length of the reports that get sent with the button press data
+    """
     total_bits = 0
     descriptor_length = len(descriptor)
     i = 0
 
+    report_size = 0
     while i < descriptor_length:
         # Check if current byte matches REPORT_SIZE
-        if descriptor[i] == REPORT_SIZE:
+        if descriptor[i] == models.HIDFieldType.REPORT_SIZE.value:
             # Move to next byte to get the size value
             i += 1
             report_size = descriptor[i]  # This gives the size in bits
-        elif descriptor[i] == REPORT_COUNT:
+        elif descriptor[i] == models.HIDFieldType.REPORT_COUNT.value:
             # Move to next byte to get the count value
             i += 1
             report_count = descriptor[i]
@@ -39,8 +38,13 @@ def get_report_length(descriptor: bytes) -> int:
     return total_bytes
 
 
-def setup_rpi_joystick_gadget(descriptor):
-    report_length = get_report_length(descriptor)
+def setup_gamepad_gadget(descriptor):
+    """
+    Create a gamepad gadet to be used in USB host mode
+    This will setup /dev/hidg0 as device to send data to
+
+    """
+    report_length = calculate_report_length(descriptor)
     log.info("Report length", length=report_length)
     joystick_model = models.USBGadgetModel(
         spec=models.GadgetSpec(
@@ -55,7 +59,7 @@ def setup_rpi_joystick_gadget(descriptor):
         strings=[
             models.GadgetLocale(
                 strings=models.GadgetLocaleValues(
-                    product="My Controller",
+                    product="BananaPI Gamepad",
                     manufacturer="HomeMade",
                     serialnumber="12345",
                 )
@@ -71,7 +75,7 @@ def setup_rpi_joystick_gadget(descriptor):
         ],
     )
     # Create a new USBGadget instance
-    joystick_gadget = USBGadget("32_buttons_rpi_joystick7", joystick_model)
+    joystick_gadget = USBGadget(gadget_name="my_gamepad", model=joystick_model)
 
     # Create the gadget directory in sysfs
     joystick_gadget.activate()
@@ -79,4 +83,4 @@ def setup_rpi_joystick_gadget(descriptor):
 
 descriptors = create_gamepad_descriptor(24)
 # Run the function to set up the gadget
-setup_rpi_joystick_gadget(descriptors)
+setup_gamepad_gadget(descriptors)

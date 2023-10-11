@@ -125,19 +125,11 @@ def physical_minimum_maximum(min_value: int, max_value: int) -> list:
     ]
 
 
-def define_axis(axis: int) -> list:
-    return [HIDFieldType.USAGE, axis]
-
-
 def report_size_count(size: int, count: int) -> list:
     """
     The size of the report and the count of how many to report
     """
     return [HIDFieldType.REPORT_SIZE, size, HIDFieldType.REPORT_COUNT, count]
-
-
-def input_data_variable_absolute() -> list:
-    return [HIDFieldType.INPUT, 0x02]
 
 
 def define_input_type(input_type: HIDInputType) -> list[int]:

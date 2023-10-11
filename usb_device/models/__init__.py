@@ -1,13 +1,10 @@
 """
 Exported Models
 """
-from enum import IntEnum
-
 from .gadget_models import (
     HIDSubclass,
     HIDProtocol,
     GadgetLocaleValues,
-    GadgetLocale,
     GadgetSpec,
     USBGadgetModel,
     USBConfigDescriptor,
