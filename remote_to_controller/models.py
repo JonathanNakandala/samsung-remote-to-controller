@@ -24,6 +24,17 @@ class Mapping(BaseModel):
     description: str
 
 
+class GadgetConfig(BaseModel):
+    """
+    Gadget Config
+    """
+
+    gamepad_type: str
+    hid_endpoint: str = Field(
+        default="/dev/hidg0", description="Device to send HID events to"
+    )
+
+
 class MappingDefinition(BaseModel):
     """
     Remote to Linux Event Mapping
